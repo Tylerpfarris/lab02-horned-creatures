@@ -4,16 +4,9 @@ import hornedCreatures from './data';
 import HeaderComponent from './Header/headerComponent';
 import ImageItem from './ImageItem/ImageItem.js';
 import ImageList from './ImageList/ImageList.js';
-
-let uniqueKeywords = [];
-hornedCreatures.map(creature => {
-  if (!uniqueKeywords.includes(creature.keyword)) uniqueKeywords.push (creature.keyword)});
-let uniqueHorns = [];
-hornedCreatures.map(creature => {
-  if (!uniqueHorns.includes(creature.horns)) uniqueHorns.push (creature.horns)});
-
-console.log(uniqueKeywords)
-
+import DropDown from './DropDown/DropDown.js';
+import { uniqueKeywords, uniqueHorns} from './uniqueArraysUtils.js';
+import {filteredHornedCreaturesFunc} from './ImageItem/ImageItemFilter.js';
 
 export default class App extends Component {
   state = {
@@ -24,41 +17,38 @@ export default class App extends Component {
     horns: 0,
   }
 
-  
-
+  // handling the change events and setting the state based on the users selection
 handleHornChange = (e) => {this.setState({horns: e.target.value})}
+handleKeywordChange = (e) => {this.setState({keyword: e.target.value})}
+
   render() {
-    const filteredHornedCreatures = hornedCreatures.filter((hornedCreature) => {
-      if (!this.state.horns && !this.state.keyword) return true;
-      if (hornedCreature.horns === Number(this.state.horns) || hornedCreature.keyword === this.state.keyword) return true;
-      return false;
-    });
-    
-    
+    const {
+      keyword,
+      horns
+    } = this.state
+//setting filteredHornedCreatures to the value of the filteredHornedCreaturesFunc which takes in the dataArr, the user selected state of keyword and horns
+    const filteredHornedCreatures = filteredHornedCreaturesFunc(hornedCreatures, keyword, horns)
+
+//setting creatureNodes = to the new filtered Image items.
     const creatureNodes = filteredHornedCreatures.map(hornedCreatures =>
       <ImageItem
         key={hornedCreatures.name}
         hornedCreatures={hornedCreatures} />)
 
+
     return ( 
+      //returning the created  components
     <>  
       <HeaderComponent />
-        <form>
-            number of horns:
-            <select value={this.state.horns}
-            onChange={(e) => {this.setState({horns: e.target.value})}}>
-              {uniqueHorns.map(hornedCreature =>
-            <option value={hornedCreature}>{hornedCreature}</option>)}
-            </select>
-            what type of creature:
-            <select value={this.state.keyword}
-            onChange={(e) => {this.setState({keyword: e.target.value})}}>
-              { uniqueKeywords.map(hornedCreature => 
-            <option value={hornedCreature}>{hornedCreature}</option>)}
-            </select>
-        </form>
+        <DropDown 
+        currentValue={this.state.horns}
+        handleChange={this.handleHornChange}
+        options={uniqueHorns} />
+        <DropDown 
+        currentValue={this.state.keyword}
+        handleChange={this.handleKeywordChange}
+        options={uniqueKeywords} />
       <ImageList creatures={creatureNodes}/>
-
     </>
     )
   }
